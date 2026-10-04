@@ -1,0 +1,32 @@
+[project]
+name = "excel-chatbot"
+version = "1.0.0"
+description = "Upload an .xlsx workbook and ask questions about it in plain language."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    # API
+    "fastapi==0.142.0",
+    "uvicorn==0.54.0",
+    "pydantic==2.13.5",
+    "pandas==3.0.6",
+    "openpyxl==3.1.5",
+    "python-multipart==0.0.32",
+    "openai==3.22.0",
+    "python-dotenv==1.2.3",
+    "httpx==0.28.1",
+    # UI
+    "streamlit==1.64.0",
+]
+
+[dependency-groups]
+# Tests and code quality; installed by default with `uv sync`
+dev = [
+    "pytest==9.1.1",
+    "pre-commit==4.6.2",
+    "ruff==0.16.10",
+    "jsonschema==4.26.0",
+]
+
+[tool.uv]
+package = false  # an application run from the source tree, not an installable package

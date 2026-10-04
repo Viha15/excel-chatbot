@@ -1,0 +1,50 @@
+# Install once:   uv sync && uv run pre-commit install
+# Run manually:   uv run pre-commit run --all-files
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-ast                  # every .py file parses
+      - id: check-merge-conflict
+      - id: debug-statements           # no leftover breakpoint() / pdb
+      - id: detect-private-key
+      - id: check-added-large-files
+        args: [--maxkb=1000]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.10
+    hooks:
+      - id: ruff-check                 # lint: errors, imports, bugbear, modern syntax
+        args:
+          - --fix
+          - --line-length=110
+          - --select=E,F,W,I,B,UP
+          - --ignore=E731
+          # FastAPI's Depends()/File() in defaults is the intended pattern, not a bug
+          - "--config=lint.flake8-bugbear.extend-immutable-calls=['fastapi.Depends', 'fastapi.File']"
+          # prompt text: long lines are the exact wording sent to the model
+          - "--config=lint.per-file-ignores={'src/services/prompts.py' = ['E501']}"
+      - id: ruff-format
+        args: [--line-length=110]
+
+  - repo: local
+    hooks:
+      - id: no-env-files
+        name: never commit .env (it holds API keys)
+        language: fail
+        entry: ".env files must not be committed; use .env.example for documentation"
+        files: '(^|/)\.env$'
+      - id: no-api-keys
+        name: no API keys in code
+        language: pygrep
+        entry: '(sk-[A-Za-z0-9_-]{20,}|(API_KEY|api_key)\s*=\s*["'']?[A-Za-z0-9_-]{24,})'
+        exclude: '^\.pre-commit-config\.yaml$'
+      - id: pytest
+        name: tests (pytest)
+        language: system
+        entry: uv run pytest -q
+        pass_filenames: false
+        types: [python]
